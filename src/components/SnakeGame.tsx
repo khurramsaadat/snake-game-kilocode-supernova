@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 
@@ -17,6 +17,19 @@ import { GameOverDialog } from '@/components/ui/GameOverDialog';
 import { Button } from '@/components/ui/button';
 
 export function SnakeGame() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const {
     snakePosition,
     foodPosition,
@@ -78,14 +91,16 @@ export function SnakeGame() {
 
       {/* Game Container */}
       <div className="relative">
-        <GameBoard>
+        <GameBoard isMobile={isMobile}>
           <AnimatePresence>
             {gameState === 'playing' && (
               <motion.div
                 key="game"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
-                className="touch-none"
+                onTouchMove={(e) => e.preventDefault()} // Prevent scrolling during swipe
+                className="touch-none select-none"
+                style={{ touchAction: 'none' }} // Disable default touch behaviors
               >
                 <Snake snake={snakePosition} />
                 <Food position={foodPosition} />

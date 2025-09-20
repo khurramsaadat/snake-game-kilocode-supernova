@@ -1,7 +1,18 @@
-// Game configuration constants
-export const GRID_SIZE = 25;
-export const CELL_SIZE = 16;
+// Game configuration constants - responsive sizing
+export const GRID_SIZE_DESKTOP = 30;
+export const GRID_SIZE_MOBILE = 20;
+export const CELL_SIZE_DESKTOP = 16;
+export const CELL_SIZE_MOBILE = 20;
+
+// Default constants (desktop size for backward compatibility)
+export const GRID_SIZE = GRID_SIZE_DESKTOP;
+export const CELL_SIZE = CELL_SIZE_DESKTOP;
 export const BOARD_SIZE = GRID_SIZE * CELL_SIZE;
+
+// Helper functions for responsive sizing
+export const getGridSize = (isMobile: boolean) => isMobile ? GRID_SIZE_MOBILE : GRID_SIZE_DESKTOP;
+export const getCellSize = (isMobile: boolean) => isMobile ? CELL_SIZE_MOBILE : CELL_SIZE_DESKTOP;
+export const getBoardSize = (isMobile: boolean) => getGridSize(isMobile) * getCellSize(isMobile);
 
 // Game timing
 export const INITIAL_TICK_RATE = 150; // milliseconds

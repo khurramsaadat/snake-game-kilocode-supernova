@@ -40,6 +40,7 @@ export function useGameControls({ onDirectionChange, isGameActive }: UseGameCont
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
     if (!isGameActive) return;
 
+    event.preventDefault(); // Prevent scrolling and other default behaviors
     const touch = event.touches[0];
     touchStartRef.current = {
       x: touch.clientX,
@@ -50,6 +51,7 @@ export function useGameControls({ onDirectionChange, isGameActive }: UseGameCont
   const handleTouchEnd = useCallback((event: React.TouchEvent) => {
     if (!isGameActive || !touchStartRef.current) return;
 
+    event.preventDefault(); // Prevent scrolling and other default behaviors
     const touch = event.changedTouches[0];
     const touchEnd = {
       x: touch.clientX,
@@ -59,7 +61,7 @@ export function useGameControls({ onDirectionChange, isGameActive }: UseGameCont
     const deltaX = touchEnd.x - touchStartRef.current.x;
     const deltaY = touchEnd.y - touchStartRef.current.y;
 
-    const minSwipeDistance = 30;
+    const minSwipeDistance = 20; // Reduced for better sensitivity
 
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
       // Horizontal swipe
