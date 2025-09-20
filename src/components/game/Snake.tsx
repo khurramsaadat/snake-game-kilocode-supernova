@@ -19,10 +19,10 @@ export function Snake({ snake }: SnakeProps) {
               : 'bg-emerald-500 dark:bg-emerald-400'
           }`}
           style={{
-            width: CELL_SIZE - 2,
-            height: CELL_SIZE - 2,
-            left: segment.x * CELL_SIZE + 1,
-            top: segment.y * CELL_SIZE + 1,
+            width: CELL_SIZE - 4,
+            height: CELL_SIZE - 4,
+            left: segment.x * CELL_SIZE + 2,
+            top: segment.y * CELL_SIZE + 2,
           }}
           initial={{ scale: 0.8, opacity: 0.8 }}
           animate={{

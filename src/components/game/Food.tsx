@@ -8,9 +8,9 @@ interface FoodProps {
 }
 
 export function Food({ position }: FoodProps) {
-  // Calculate proper centering within cell
-  const foodSize = Math.max(CELL_SIZE - 6, 8); // Ensure minimum size of 8px
-  const offset = (CELL_SIZE - foodSize) / 2;
+  // Calculate proper centering within cell - ensure food stays within bounds
+  const foodSize = Math.max(CELL_SIZE - 8, 6); // Ensure minimum size of 6px
+  const offset = Math.max(2, (CELL_SIZE - foodSize) / 2); // Minimum 2px offset from edge
 
   return (
     <motion.div

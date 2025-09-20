@@ -72,8 +72,8 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
   // Generate food position with better positioning
   const generateFoodPositionAligned = useCallback((currentSnake: Position[]): Position => {
     let newPosition: Position;
-    const minPos = 2; // Keep food away from edges
-    const maxPos = GRID_SIZE - 3; // Keep food away from edges
+    const minPos = 1; // Keep food away from edges
+    const maxPos = GRID_SIZE - 2; // Keep food away from edges
 
     do {
       // Ensure food is properly positioned within safe bounds
