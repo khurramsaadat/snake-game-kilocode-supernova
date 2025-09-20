@@ -31,12 +31,13 @@ export interface GameStateReturn {
   resetGame: () => void;
   setDirection: (newDirection: Direction) => void;
   toggleMute: () => void;
+  playEatSound: () => void;
 }
 
-export function useSnakeGame(): GameStateReturn {
+export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
   // Game state
   const [snakePosition, setSnakePosition] = useState<Position[]>(INITIAL_SNAKE_POSITION);
-  const [foodPosition, setFoodPosition] = useState<Position>({ x: 15, y: 15 });
+  const [foodPosition, setFoodPosition] = useState<Position>({ x: 12, y: 12 }); // Better initial position
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [nextDirection, setNextDirection] = useState<Direction>('RIGHT');
   const [score, setScore] = useState(0);
@@ -68,6 +69,28 @@ export function useSnakeGame(): GameStateReturn {
     return newPosition;
   }, []);
 
+  // Generate food position with better positioning
+  const generateFoodPositionAligned = useCallback((currentSnake: Position[]): Position => {
+    let newPosition: Position;
+    const minPos = 2; // Keep food away from edges
+    const maxPos = GRID_SIZE - 3; // Keep food away from edges
+
+    do {
+      // Ensure food is properly positioned within safe bounds
+      newPosition = {
+        x: Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos,
+        y: Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos,
+      };
+
+      // Double-check bounds to be absolutely sure
+      newPosition.x = Math.max(minPos, Math.min(maxPos, newPosition.x));
+      newPosition.y = Math.max(minPos, Math.min(maxPos, newPosition.y));
+
+    } while (currentSnake.some(segment => segment.x === newPosition.x && segment.y === newPosition.y));
+
+    return newPosition;
+  }, []);
+
   // Check collision with walls or self
   const checkCollision = useCallback((head: Position, body: Position[]): boolean => {
     // Wall collision - check if head is outside the grid boundaries
@@ -75,12 +98,15 @@ export function useSnakeGame(): GameStateReturn {
       console.log('Wall collision detected:', head, 'Grid size:', GRID_SIZE);
       return true;
     }
+
     // Self collision - check if head hits any part of the body
     const selfCollision = body.some(segment => segment.x === head.x && segment.y === head.y);
     if (selfCollision) {
       console.log('Self collision detected:', head);
+      return true;
     }
-    return selfCollision;
+
+    return false;
   }, []);
 
   // Game loop
@@ -108,7 +134,11 @@ export function useSnakeGame(): GameStateReturn {
       // Check if food is eaten
       if (newHead.x === foodPosition.x && newHead.y === foodPosition.y) {
         setScore(prev => prev + POINTS_PER_FOOD);
-        setFoodPosition(generateFoodPosition(newSnake));
+        setFoodPosition(generateFoodPositionAligned(newSnake));
+        // Play eat sound effect
+        if (playEatSound) {
+          playEatSound();
+        }
         // Increase speed
         tickRateRef.current = Math.max(
           MIN_TICK_RATE,
@@ -162,22 +192,22 @@ export function useSnakeGame(): GameStateReturn {
   const startGame = useCallback(() => {
     setGameState('playing');
     setSnakePosition(INITIAL_SNAKE_POSITION);
-    setFoodPosition(generateFoodPosition(INITIAL_SNAKE_POSITION));
+    setFoodPosition(generateFoodPositionAligned(INITIAL_SNAKE_POSITION));
     setDirection('RIGHT');
     setNextDirection('RIGHT');
     setScore(0);
     tickRateRef.current = INITIAL_TICK_RATE;
-  }, [generateFoodPosition]);
+  }, [generateFoodPositionAligned]);
 
   const resetGame = useCallback(() => {
     setGameState('start');
     setSnakePosition(INITIAL_SNAKE_POSITION);
-    setFoodPosition(generateFoodPosition(INITIAL_SNAKE_POSITION));
+    setFoodPosition(generateFoodPositionAligned(INITIAL_SNAKE_POSITION));
     setDirection('RIGHT');
     setNextDirection('RIGHT');
     setScore(0);
     tickRateRef.current = INITIAL_TICK_RATE;
-  }, [generateFoodPosition]);
+  }, [generateFoodPositionAligned]);
 
   const setDirectionHandler = useCallback((newDirection: Direction) => {
     // Prevent reversing into self
@@ -197,6 +227,12 @@ export function useSnakeGame(): GameStateReturn {
     setIsMuted(prev => !prev);
   }, []);
 
+  const handlePlayEatSound = () => {
+    if (playEatSound) {
+      playEatSound();
+    }
+  };
+
   return {
     snakePosition,
     foodPosition,
@@ -209,5 +245,6 @@ export function useSnakeGame(): GameStateReturn {
     resetGame,
     setDirection: setDirectionHandler,
     toggleMute,
+    playEatSound: handlePlayEatSound,
   };
 }

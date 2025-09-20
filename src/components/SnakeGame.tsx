@@ -14,6 +14,7 @@ import { Food } from '@/components/game/Food';
 import { StartScreen } from '@/components/ui/StartScreen';
 import { GameOverDialog } from '@/components/ui/GameOverDialog';
 import { ArrowControls } from '@/components/ui/ArrowControls';
+import { FullscreenControls } from '@/components/ui/FullscreenControls';
 
 import { Button } from '@/components/ui/button';
 
@@ -44,8 +45,8 @@ export function SnakeGame() {
     toggleMute,
   } = useSnakeGame();
 
-  const { playGameOverSound } = useAudio();
-  const { handleTouchStart, handleTouchEnd } = useGameControls({
+  const { playEatSound, playGameOverSound } = useAudio();
+  const { handleTouchStart, handleTouchEnd, handleTouchMove } = useGameControls({
     onDirectionChange: setDirection,
     isGameActive: gameState === 'playing',
   });
@@ -91,9 +92,12 @@ export function SnakeGame() {
       </div>
 
       {/* Main Game Area */}
-      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full">
-        {/* Game Container - Pushed up to make room for arrow controls */}
-        <div className="relative mb-6">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full pt-8">
+        {/* Fullscreen Controls */}
+        <FullscreenControls isMobile={isMobile} gameState={gameState} />
+
+        {/* Game Container - Moved up slightly */}
+        <div className="relative mb-8">
           <GameBoard isMobile={isMobile}>
             <AnimatePresence>
               {gameState === 'playing' && (
@@ -101,7 +105,7 @@ export function SnakeGame() {
                   key="game"
                   onTouchStart={handleTouchStart}
                   onTouchEnd={handleTouchEnd}
-                  onTouchMove={(e) => e.preventDefault()} // Prevent scrolling during swipe
+                  onTouchMove={handleTouchMove}
                   className="touch-none select-none"
                   style={{ touchAction: 'none' }} // Disable default touch behaviors
                 >

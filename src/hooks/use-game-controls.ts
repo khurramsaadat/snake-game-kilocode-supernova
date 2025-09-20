@@ -7,7 +7,7 @@ interface UseGameControlsProps {
 }
 
 export function useGameControls({ onDirectionChange, isGameActive }: UseGameControlsProps) {
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number; timestamp?: number } | null>(null);
 
   // Desktop controls
   useEffect(() => {
@@ -49,7 +49,29 @@ export function useGameControls({ onDirectionChange, isGameActive }: UseGameCont
       touchStartRef.current = {
         x: touch.clientX,
         y: touch.clientY,
+        timestamp: Date.now(),
       };
+    }
+  }, [isGameActive]);
+
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    if (!isGameActive || !touchStartRef.current) return;
+
+    // Prevent scrolling during touch move
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Optional: Add visual feedback during swipe
+    const touch = event.touches[0];
+    if (touch) {
+      const deltaX = touch.clientX - touchStartRef.current.x;
+      const deltaY = touch.clientY - touchStartRef.current.y;
+
+      // Provide immediate feedback for better UX
+      const minSwipeDistance = 30; // Less sensitive for better control
+      if (Math.abs(deltaX) > minSwipeDistance || Math.abs(deltaY) > minSwipeDistance) {
+        // Visual feedback could be added here if needed
+      }
     }
   }, [isGameActive]);
 
@@ -70,24 +92,30 @@ export function useGameControls({ onDirectionChange, isGameActive }: UseGameCont
       const deltaX = touchEnd.x - touchStartRef.current.x;
       const deltaY = touchEnd.y - touchStartRef.current.y;
 
-      const minSwipeDistance = 15; // Even more sensitive for mobile
+      const minSwipeDistance = 30; // Less sensitive for better control
+      const maxSwipeTime = 500; // Maximum time for swipe (ms)
+      const swipeTime = Date.now() - (touchStartRef.current.timestamp || Date.now());
 
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // Horizontal swipe
-        if (Math.abs(deltaX) > minSwipeDistance) {
-          if (deltaX > 0) {
-            onDirectionChange('RIGHT');
-          } else {
-            onDirectionChange('LEFT');
+      // Only register swipe if it's quick enough and long enough
+      if (swipeTime < maxSwipeTime) {
+        // Determine swipe direction with priority
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Horizontal swipe
+          if (Math.abs(deltaX) > minSwipeDistance) {
+            if (deltaX > 0) {
+              onDirectionChange('RIGHT');
+            } else {
+              onDirectionChange('LEFT');
+            }
           }
-        }
-      } else {
-        // Vertical swipe
-        if (Math.abs(deltaY) > minSwipeDistance) {
-          if (deltaY > 0) {
-            onDirectionChange('DOWN');
-          } else {
-            onDirectionChange('UP');
+        } else {
+          // Vertical swipe
+          if (Math.abs(deltaY) > minSwipeDistance) {
+            if (deltaY > 0) {
+              onDirectionChange('DOWN');
+            } else {
+              onDirectionChange('UP');
+            }
           }
         }
       }
@@ -99,5 +127,6 @@ export function useGameControls({ onDirectionChange, isGameActive }: UseGameCont
   return {
     handleTouchStart,
     handleTouchEnd,
+    handleTouchMove,
   };
 }

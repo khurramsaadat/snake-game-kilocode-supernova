@@ -8,14 +8,18 @@ interface FoodProps {
 }
 
 export function Food({ position }: FoodProps) {
+  // Calculate proper centering within cell
+  const foodSize = Math.max(CELL_SIZE - 6, 8); // Ensure minimum size of 8px
+  const offset = (CELL_SIZE - foodSize) / 2;
+
   return (
     <motion.div
-      className="absolute rounded-full bg-red-500 shadow-lg"
+      className="absolute rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-lg border-2 border-red-300"
       style={{
-        width: CELL_SIZE - 4,
-        height: CELL_SIZE - 4,
-        left: position.x * CELL_SIZE + 2,
-        top: position.y * CELL_SIZE + 2,
+        width: foodSize,
+        height: foodSize,
+        left: position.x * CELL_SIZE + offset,
+        top: position.y * CELL_SIZE + offset,
       }}
       initial={{ scale: 0, rotate: 0 }}
       animate={{

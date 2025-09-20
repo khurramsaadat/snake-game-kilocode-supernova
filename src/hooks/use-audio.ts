@@ -34,9 +34,10 @@ export function useAudio() {
   }, [initAudioContext]);
 
   const playEatSound = useCallback(() => {
-    // Pleasant ascending tone for eating food
-    playSound(440, 0.1, 'sine');
-    setTimeout(() => playSound(660, 0.1, 'sine'), 50);
+    // Pleasant ascending chime for eating food
+    playSound(523, 0.15, 'sine'); // C5
+    setTimeout(() => playSound(659, 0.15, 'sine'), 80); // E5
+    setTimeout(() => playSound(784, 0.2, 'sine'), 160); // G5
   }, [playSound]);
 
   const playGameOverSound = useCallback(() => {
