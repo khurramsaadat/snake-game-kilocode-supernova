@@ -1,8 +1,8 @@
 // Game configuration constants - responsive sizing
 export const GRID_SIZE_DESKTOP = 25; // Reduced for larger cells
-export const GRID_SIZE_MOBILE = 18; // Reduced for larger cells
+export const GRID_SIZE_MOBILE = 15; // Smaller for mobile screens
 export const CELL_SIZE_DESKTOP = 20; // 20% bigger than before (was 16)
-export const CELL_SIZE_MOBILE = 24; // 20% bigger than before (was 20)
+export const CELL_SIZE_MOBILE = 20; // Smaller for mobile screens
 
 // Default constants (desktop size for backward compatibility)
 export const GRID_SIZE = GRID_SIZE_DESKTOP;

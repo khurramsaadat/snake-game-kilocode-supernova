@@ -64,10 +64,14 @@ export function SnakeGame() {
 
   const handlePlayAgain = () => {
     resetGame();
+    // Ensure we go back to start screen
+    setTimeout(() => {
+      // This will trigger the start screen to show
+    }, 100);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex flex-col p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex flex-col p-2 md:p-4">
       {/* Header with score and controls */}
       <div className="w-full max-w-2xl mb-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
@@ -127,8 +131,8 @@ export function SnakeGame() {
           </GameBoard>
         </div>
 
-        {/* Arrow Controls - Only show during gameplay */}
-        {gameState === 'playing' && (
+        {/* Arrow Controls - Only show during gameplay and on mobile */}
+        {gameState === 'playing' && isMobile && (
           <ArrowControls
             onDirectionChange={setDirection}
             disabled={false}

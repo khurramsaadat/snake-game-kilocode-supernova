@@ -13,7 +13,7 @@ export function GameBoard({ children, isMobile = false }: GameBoardProps) {
 
   return (
     <motion.div
-      className={`relative bg-gradient-to-br from-emerald-50 via-slate-50 to-cyan-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border-4 border-emerald-200 dark:border-emerald-700 rounded-3xl shadow-2xl ${isMobile ? 'mx-6' : 'mx-4'} backdrop-blur-sm`}
+      className={`relative bg-gradient-to-br from-emerald-50 via-slate-50 to-cyan-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border-4 border-emerald-200 dark:border-emerald-700 rounded-3xl shadow-2xl ${isMobile ? 'mx-2' : 'mx-4'} backdrop-blur-sm`}
       style={{
         width: boardSize,
         height: boardSize,

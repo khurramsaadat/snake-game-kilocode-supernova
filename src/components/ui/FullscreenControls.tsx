@@ -13,11 +13,22 @@ export function FullscreenControls({ isMobile, gameState }: FullscreenControlsPr
   const { isFullscreen, toggleFullscreen } = useFullscreen();
 
   // Always show fullscreen controls, but only enable during gameplay
+  // Enable on both mobile and desktop
   const isDisabled = gameState !== 'playing';
+
+  const handleFullscreenClick = async () => {
+    if (!isDisabled) {
+      try {
+        await toggleFullscreen();
+      } catch (error) {
+        console.error('Fullscreen toggle failed:', error);
+      }
+    }
+  };
 
   return (
     <motion.div
-      className="flex justify-center mb-6"
+      className="flex justify-center mb-4"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -27,7 +38,7 @@ export function FullscreenControls({ isMobile, gameState }: FullscreenControlsPr
         whileTap={{ scale: 0.95 }}
       >
         <Button
-          onClick={toggleFullscreen}
+          onClick={handleFullscreenClick}
           disabled={isDisabled}
           variant="outline"
           size="sm"
