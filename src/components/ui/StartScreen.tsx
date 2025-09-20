@@ -1,13 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useFullscreen } from '@/hooks/use-fullscreen';
 
 interface StartScreenProps {
   highScore: number;
   onStartGame: () => void;
+  isMobile?: boolean;
 }
 
-export function StartScreen({ highScore, onStartGame }: StartScreenProps) {
+export function StartScreen({ highScore, onStartGame, isMobile = false }: StartScreenProps) {
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
   return (
     <motion.div
       className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 z-10"
@@ -49,10 +53,32 @@ export function StartScreen({ highScore, onStartGame }: StartScreenProps) {
         </motion.div>
 
         <motion.div
+          className="space-y-4"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
         >
+          {isMobile && (
+            <Button
+              onClick={toggleFullscreen}
+              variant="outline"
+              size="sm"
+              className="px-4 py-2 text-sm bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+            >
+              {isFullscreen ? (
+                <>
+                  <Minimize size={16} className="mr-2" />
+                  Exit Fullscreen
+                </>
+              ) : (
+                <>
+                  <Maximize size={16} className="mr-2" />
+                  Go Fullscreen
+                </>
+              )}
+            </Button>
+          )}
+
           <Button
             onClick={onStartGame}
             size="lg"

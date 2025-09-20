@@ -40,45 +40,55 @@ export function useGameControls({ onDirectionChange, isGameActive }: UseGameCont
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
     if (!isGameActive) return;
 
-    event.preventDefault(); // Prevent scrolling and other default behaviors
+    // Prevent scrolling and other default behaviors
+    event.preventDefault();
+    event.stopPropagation();
+
     const touch = event.touches[0];
-    touchStartRef.current = {
-      x: touch.clientX,
-      y: touch.clientY,
-    };
+    if (touch) {
+      touchStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+      };
+    }
   }, [isGameActive]);
 
   const handleTouchEnd = useCallback((event: React.TouchEvent) => {
     if (!isGameActive || !touchStartRef.current) return;
 
-    event.preventDefault(); // Prevent scrolling and other default behaviors
+    // Prevent scrolling and other default behaviors
+    event.preventDefault();
+    event.stopPropagation();
+
     const touch = event.changedTouches[0];
-    const touchEnd = {
-      x: touch.clientX,
-      y: touch.clientY,
-    };
+    if (touch) {
+      const touchEnd = {
+        x: touch.clientX,
+        y: touch.clientY,
+      };
 
-    const deltaX = touchEnd.x - touchStartRef.current.x;
-    const deltaY = touchEnd.y - touchStartRef.current.y;
+      const deltaX = touchEnd.x - touchStartRef.current.x;
+      const deltaY = touchEnd.y - touchStartRef.current.y;
 
-    const minSwipeDistance = 20; // Reduced for better sensitivity
+      const minSwipeDistance = 15; // Even more sensitive for mobile
 
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Horizontal swipe
-      if (Math.abs(deltaX) > minSwipeDistance) {
-        if (deltaX > 0) {
-          onDirectionChange('RIGHT');
-        } else {
-          onDirectionChange('LEFT');
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        if (Math.abs(deltaX) > minSwipeDistance) {
+          if (deltaX > 0) {
+            onDirectionChange('RIGHT');
+          } else {
+            onDirectionChange('LEFT');
+          }
         }
-      }
-    } else {
-      // Vertical swipe
-      if (Math.abs(deltaY) > minSwipeDistance) {
-        if (deltaY > 0) {
-          onDirectionChange('DOWN');
-        } else {
-          onDirectionChange('UP');
+      } else {
+        // Vertical swipe
+        if (Math.abs(deltaY) > minSwipeDistance) {
+          if (deltaY > 0) {
+            onDirectionChange('DOWN');
+          } else {
+            onDirectionChange('UP');
+          }
         }
       }
     }

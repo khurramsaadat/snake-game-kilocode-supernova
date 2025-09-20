@@ -13,6 +13,7 @@ import { Snake } from '@/components/game/Snake';
 import { Food } from '@/components/game/Food';
 import { StartScreen } from '@/components/ui/StartScreen';
 import { GameOverDialog } from '@/components/ui/GameOverDialog';
+import { ArrowControls } from '@/components/ui/ArrowControls';
 
 import { Button } from '@/components/ui/button';
 
@@ -65,7 +66,7 @@ export function SnakeGame() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex flex-col p-4">
       {/* Header with score and controls */}
       <div className="w-full max-w-2xl mb-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
@@ -89,34 +90,46 @@ export function SnakeGame() {
         </Button>
       </div>
 
-      {/* Game Container */}
-      <div className="relative">
-        <GameBoard isMobile={isMobile}>
-          <AnimatePresence>
-            {gameState === 'playing' && (
-              <motion.div
-                key="game"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-                onTouchMove={(e) => e.preventDefault()} // Prevent scrolling during swipe
-                className="touch-none select-none"
-                style={{ touchAction: 'none' }} // Disable default touch behaviors
-              >
-                <Snake snake={snakePosition} />
-                <Food position={foodPosition} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+      {/* Main Game Area */}
+      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full">
+        {/* Game Container - Pushed up to make room for arrow controls */}
+        <div className="relative mb-6">
+          <GameBoard isMobile={isMobile}>
+            <AnimatePresence>
+              {gameState === 'playing' && (
+                <motion.div
+                  key="game"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                  onTouchMove={(e) => e.preventDefault()} // Prevent scrolling during swipe
+                  className="touch-none select-none"
+                  style={{ touchAction: 'none' }} // Disable default touch behaviors
+                >
+                  <Snake snake={snakePosition} />
+                  <Food position={foodPosition} />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          <AnimatePresence>
-            {gameState === 'start' && (
-              <StartScreen
-                highScore={highScore}
-                onStartGame={handleStartGame}
-              />
-            )}
-          </AnimatePresence>
-        </GameBoard>
+            <AnimatePresence>
+              {gameState === 'start' && (
+                <StartScreen
+                  highScore={highScore}
+                  onStartGame={handleStartGame}
+                  isMobile={isMobile}
+                />
+              )}
+            </AnimatePresence>
+          </GameBoard>
+        </div>
+
+        {/* Arrow Controls - Only show during gameplay */}
+        {gameState === 'playing' && (
+          <ArrowControls
+            onDirectionChange={setDirection}
+            disabled={false}
+          />
+        )}
       </div>
 
       {/* Game Over Dialog */}
@@ -130,10 +143,10 @@ export function SnakeGame() {
       {/* Instructions */}
       <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400 max-w-md">
         <p className="mb-2">
-          <span className="font-semibold">Desktop:</span> Use arrow keys to control
+          <span className="font-semibold">Desktop:</span> Use arrow keys or buttons
         </p>
         <p>
-          <span className="font-semibold">Mobile:</span> Swipe on the game board
+          <span className="font-semibold">Mobile:</span> Swipe or use buttons
         </p>
       </div>
     </div>
