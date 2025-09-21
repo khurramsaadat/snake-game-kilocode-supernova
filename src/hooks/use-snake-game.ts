@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   GRID_SIZE,
-  INITIAL_SNAKE_POSITION,
+  GRID_SIZE_MOBILE,
+  getInitialSnakePosition,
   INITIAL_TICK_RATE,
   MIN_TICK_RATE,
   SPEED_INCREASE_FACTOR,
@@ -36,8 +37,8 @@ export interface GameStateReturn {
 
 export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
   // Game state
-  const [snakePosition, setSnakePosition] = useState<Position[]>(INITIAL_SNAKE_POSITION);
-  const [foodPosition, setFoodPosition] = useState<Position>({ x: 12, y: 12 }); // Better initial position
+  const [snakePosition, setSnakePosition] = useState<Position[]>(getInitialSnakePosition(GRID_SIZE_MOBILE));
+  const [foodPosition, setFoodPosition] = useState<Position>({ x: 7, y: 7 }); // Better initial position within bounds
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [nextDirection, setNextDirection] = useState<Direction>('RIGHT');
   const [score, setScore] = useState(0);
@@ -62,8 +63,8 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
     let newPosition: Position;
     do {
       newPosition = {
-        x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE),
+        x: Math.floor(Math.random() * GRID_SIZE_MOBILE),
+        y: Math.floor(Math.random() * GRID_SIZE_MOBILE),
       };
     } while (currentSnake.some(segment => segment.x === newPosition.x && segment.y === newPosition.y));
     return newPosition;
@@ -73,7 +74,7 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
   const generateFoodPositionAligned = useCallback((currentSnake: Position[]): Position => {
     let newPosition: Position;
     const minPos = 1; // Keep food away from edges
-    const maxPos = GRID_SIZE - 2; // Keep food away from edges
+    const maxPos = GRID_SIZE_MOBILE - 2; // Use mobile grid size for bounds
 
     do {
       // Ensure food is properly positioned within safe bounds
@@ -88,14 +89,23 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
 
     } while (currentSnake.some(segment => segment.x === newPosition.x && segment.y === newPosition.y));
 
+    console.log('Generated food position:', newPosition, 'within bounds:', {
+      x: newPosition.x >= 0 && newPosition.x < GRID_SIZE_MOBILE,
+      y: newPosition.y >= 0 && newPosition.y < GRID_SIZE_MOBILE
+    });
+
     return newPosition;
   }, []);
 
   // Check collision with walls or self
   const checkCollision = useCallback((head: Position, body: Position[]): boolean => {
     // Wall collision - check if head is outside the grid boundaries
-    if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-      console.log('Wall collision detected:', head, 'Grid size:', GRID_SIZE);
+    // Use the same grid size as the visual constraints (15x15 for mobile)
+    const gridWidth = GRID_SIZE_MOBILE;
+    const gridHeight = GRID_SIZE_MOBILE; // Match visual constraints
+
+    if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) {
+      console.log('Wall collision detected:', head, 'Grid size:', { width: gridWidth, height: gridHeight });
       return true;
     }
 
@@ -190,9 +200,10 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
 
   // Actions
   const startGame = useCallback(() => {
+    const initialSnake = getInitialSnakePosition(GRID_SIZE_MOBILE);
     setGameState('playing');
-    setSnakePosition(INITIAL_SNAKE_POSITION);
-    setFoodPosition(generateFoodPositionAligned(INITIAL_SNAKE_POSITION));
+    setSnakePosition(initialSnake);
+    setFoodPosition(generateFoodPositionAligned(initialSnake));
     setDirection('RIGHT');
     setNextDirection('RIGHT');
     setScore(0);
@@ -200,9 +211,10 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
   }, [generateFoodPositionAligned]);
 
   const resetGame = useCallback(() => {
+    const initialSnake = getInitialSnakePosition(GRID_SIZE_MOBILE);
     setGameState('start');
-    setSnakePosition(INITIAL_SNAKE_POSITION);
-    setFoodPosition(generateFoodPositionAligned(INITIAL_SNAKE_POSITION));
+    setSnakePosition(initialSnake);
+    setFoodPosition(generateFoodPositionAligned(initialSnake));
     setDirection('RIGHT');
     setNextDirection('RIGHT');
     setScore(0);

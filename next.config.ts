@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    // Disable React Server Components temporarily to fix the error
+    serverComponentsExternalPackages: [],
+  },
+  // Enable standalone output for better compatibility
+  output: 'standalone',
 };
 
 export default nextConfig;

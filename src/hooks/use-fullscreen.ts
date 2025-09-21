@@ -24,6 +24,11 @@ export function useFullscreen() {
 
   const enterFullscreen = useCallback(async () => {
     try {
+      // Check if fullscreen is supported
+      if (!document.fullscreenEnabled) {
+        throw new Error('Fullscreen not supported');
+      }
+
       if (document.documentElement.requestFullscreen) {
         await document.documentElement.requestFullscreen();
       } else if ('webkitRequestFullscreen' in document.documentElement) {
@@ -32,9 +37,12 @@ export function useFullscreen() {
         await (document.documentElement as HTMLElement & { mozRequestFullScreen: () => Promise<void> }).mozRequestFullScreen();
       } else if ('msRequestFullscreen' in document.documentElement) {
         await (document.documentElement as HTMLElement & { msRequestFullscreen: () => Promise<void> }).msRequestFullscreen();
+      } else {
+        throw new Error('No fullscreen method available');
       }
     } catch (error) {
       console.error('Failed to enter fullscreen:', error);
+      throw error; // Re-throw to allow caller to handle
     }
   }, []);
 

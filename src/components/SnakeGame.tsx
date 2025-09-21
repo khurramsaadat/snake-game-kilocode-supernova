@@ -24,7 +24,9 @@ export function SnakeGame() {
   // Detect mobile device
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+      const mobile = window.innerWidth < 768 || 'ontouchstart' in window;
+      setIsMobile(mobile);
+      console.log('Mobile detection:', { width: window.innerWidth, hasTouch: 'ontouchstart' in window, isMobile: mobile });
     };
 
     checkMobile();
@@ -96,20 +98,20 @@ export function SnakeGame() {
       </div>
 
       {/* Main Game Area */}
-      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full pt-8">
+      <div className="flex-1 flex flex-col items-center justify-center w-full pt-8 max-w-none px-0 mobile-full-width">
         {/* Fullscreen Controls */}
         <FullscreenControls isMobile={isMobile} gameState={gameState} />
 
         {/* Game Container - Moved up slightly */}
-        <div className="relative mb-8">
+        <div className={`relative mb-8 ${isMobile ? 'w-full px-0' : ''}`}>
           <GameBoard isMobile={isMobile}>
             <AnimatePresence>
-              {gameState === 'playing' && (
+              {(gameState === 'playing' || gameState === 'gameOver') && (
                 <motion.div
                   key="game"
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                  onTouchMove={handleTouchMove}
+                  onTouchStart={gameState === 'playing' ? handleTouchStart : undefined}
+                  onTouchEnd={gameState === 'playing' ? handleTouchEnd : undefined}
+                  onTouchMove={gameState === 'playing' ? handleTouchMove : undefined}
                   className="touch-none select-none"
                   style={{ touchAction: 'none' }} // Disable default touch behaviors
                 >

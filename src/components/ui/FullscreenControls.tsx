@@ -19,9 +19,20 @@ export function FullscreenControls({ isMobile, gameState }: FullscreenControlsPr
   const handleFullscreenClick = async () => {
     if (!isDisabled) {
       try {
+        // On mobile, provide user feedback about fullscreen limitations
+        if (isMobile && !isFullscreen) {
+          console.log('Attempting to enter fullscreen on mobile...');
+          // Some mobile browsers require user interaction or have restrictions
+          // Let's try with additional error handling
+        }
         await toggleFullscreen();
       } catch (error) {
         console.error('Fullscreen toggle failed:', error);
+        // On mobile, fullscreen might not be available or require permissions
+        if (isMobile) {
+          console.log('Fullscreen not available on this mobile device/browser');
+          // Could show a toast notification here if needed
+        }
       }
     }
   };

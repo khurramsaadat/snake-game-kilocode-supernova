@@ -1,13 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 interface GameOverDialogProps {
@@ -21,48 +13,54 @@ export function GameOverDialog({ isOpen, score, highScore, onPlayAgain }: GameOv
   const isNewHighScore = score === highScore && score > 0;
 
   return (
-    <AlertDialog open={isOpen}>
-      <AlertDialogContent className="sm:max-w-md">
+    <AnimatePresence>
+      {isOpen && (
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
+          className="w-full max-w-md mx-auto mt-6 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border-2 border-emerald-200 dark:border-emerald-700"
         >
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-center text-2xl font-bold">
+          <div className="text-center space-y-4">
+            <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {isNewHighScore ? '🎉 New High Score!' : '💀 Game Over'}
-            </AlertDialogTitle>
-            <div className="text-center space-y-4">
-              <div className="text-4xl font-bold text-slate-900 dark:text-slate-100">
-                {score}
-              </div>
-              <div className="space-y-2">
-                <p className="text-slate-600 dark:text-slate-400">
-                  {isNewHighScore
-                    ? 'Congratulations! You set a new record!'
-                    : `Your score: ${score}`
-                  }
-                </p>
-                {highScore > 0 && (
-                  <p className="text-sm text-slate-500 dark:text-slate-500">
-                    High Score: {highScore}
-                  </p>
-                )}
-              </div>
             </div>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
-            <AlertDialogAction asChild>
-              <Button
-                onClick={onPlayAgain}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-              >
-                Play Again
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
+
+            <p className="text-slate-600 dark:text-slate-400">
+              {isNewHighScore
+                ? 'Congratulations! You achieved a new high score.'
+                : 'Game has ended.'
+              }
+            </p>
+
+            <div className="text-4xl font-bold text-slate-900 dark:text-slate-100">
+              {score}
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-slate-600 dark:text-slate-400">
+                {isNewHighScore
+                  ? 'Congratulations! You set a new record!'
+                  : `Your score: ${score}`
+                }
+              </p>
+              {highScore > 0 && (
+                <p className="text-sm text-slate-500 dark:text-slate-500">
+                  High Score: {highScore}
+                </p>
+              )}
+            </div>
+
+            <Button
+              onClick={onPlayAgain}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              Play Again
+            </Button>
+          </div>
         </motion.div>
-      </AlertDialogContent>
-    </AlertDialog>
+      )}
+    </AnimatePresence>
   );
 }

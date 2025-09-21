@@ -12,7 +12,7 @@ export function Snake({ snake }: SnakeProps) {
     <>
       {snake.map((segment, index) => (
         <motion.div
-          key={`${segment.x}-${segment.y}`}
+          key={`${segment.x}-${segment.y}-${index}`}
           className={`absolute rounded-sm ${
             index === 0
               ? 'bg-emerald-600 dark:bg-emerald-500 shadow-lg'

@@ -32,12 +32,15 @@ export const DIRECTIONS = {
   RIGHT: { x: 1, y: 0 },
 } as const;
 
-// Initial snake position (center of board, moving right)
-export const INITIAL_SNAKE_POSITION = [
-  { x: Math.floor(GRID_SIZE / 2), y: Math.floor(GRID_SIZE / 2) },
-  { x: Math.floor(GRID_SIZE / 2) - 1, y: Math.floor(GRID_SIZE / 2) },
-  { x: Math.floor(GRID_SIZE / 2) - 2, y: Math.floor(GRID_SIZE / 2) },
+// Helper function to get initial snake position based on grid size
+export const getInitialSnakePosition = (gridSize: number) => [
+  { x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2) },
+  { x: Math.floor(gridSize / 2) - 1, y: Math.floor(gridSize / 2) },
+  { x: Math.floor(gridSize / 2) - 2, y: Math.floor(gridSize / 2) },
 ];
+
+// Initial snake position (center of board, moving right) - desktop default
+export const INITIAL_SNAKE_POSITION = getInitialSnakePosition(GRID_SIZE);
 
 // Game states
 export type GameState = 'start' | 'playing' | 'gameOver';
