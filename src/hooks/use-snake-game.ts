@@ -61,10 +61,11 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
   // Generate random food position
   const generateFoodPosition = useCallback((currentSnake: Position[]): Position => {
     let newPosition: Position;
+    const gridHeight = Math.floor(GRID_SIZE_MOBILE * 1.5); // Match visual board height
     do {
       newPosition = {
         x: Math.floor(Math.random() * GRID_SIZE_MOBILE),
-        y: Math.floor(Math.random() * GRID_SIZE_MOBILE),
+        y: Math.floor(Math.random() * gridHeight),
       };
     } while (currentSnake.some(segment => segment.x === newPosition.x && segment.y === newPosition.y));
     return newPosition;
@@ -74,24 +75,26 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
   const generateFoodPositionAligned = useCallback((currentSnake: Position[]): Position => {
     let newPosition: Position;
     const minPos = 1; // Keep food away from edges
-    const maxPos = GRID_SIZE_MOBILE - 2; // Use mobile grid size for bounds
+    const gridHeight = Math.floor(GRID_SIZE_MOBILE * 1.5); // Match visual board height
+    const maxX = GRID_SIZE_MOBILE - 2; // 15 columns (0-14)
+    const maxY = gridHeight - 2; // 22 rows (0-21)
 
     do {
       // Ensure food is properly positioned within safe bounds
       newPosition = {
-        x: Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos,
-        y: Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos,
+        x: Math.floor(Math.random() * (maxX - minPos + 1)) + minPos,
+        y: Math.floor(Math.random() * (maxY - minPos + 1)) + minPos,
       };
 
       // Double-check bounds to be absolutely sure
-      newPosition.x = Math.max(minPos, Math.min(maxPos, newPosition.x));
-      newPosition.y = Math.max(minPos, Math.min(maxPos, newPosition.y));
+      newPosition.x = Math.max(minPos, Math.min(maxX, newPosition.x));
+      newPosition.y = Math.max(minPos, Math.min(maxY, newPosition.y));
 
     } while (currentSnake.some(segment => segment.x === newPosition.x && segment.y === newPosition.y));
 
     console.log('Generated food position:', newPosition, 'within bounds:', {
       x: newPosition.x >= 0 && newPosition.x < GRID_SIZE_MOBILE,
-      y: newPosition.y >= 0 && newPosition.y < GRID_SIZE_MOBILE
+      y: newPosition.y >= 0 && newPosition.y < gridHeight
     });
 
     return newPosition;
@@ -100,9 +103,12 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
   // Check collision with walls or self
   const checkCollision = useCallback((head: Position, body: Position[]): boolean => {
     // Wall collision - check if head is outside the grid boundaries
-    // Use the same grid size as the visual constraints (15x15 for mobile)
-    const gridWidth = GRID_SIZE_MOBILE;
-    const gridHeight = GRID_SIZE_MOBILE; // Match visual constraints
+    // For mobile, the visual board is 1.5x height, so make collision grid match visual board
+    const gridWidth = GRID_SIZE_MOBILE; // 15 columns
+    const gridHeight = Math.floor(GRID_SIZE_MOBILE * 1.5); // 22 rows to match visual board
+
+    // Debug logging to understand collision detection
+    console.log('Collision check - Head:', head, 'Grid size:', { width: gridWidth, height: gridHeight });
 
     if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) {
       console.log('Wall collision detected:', head, 'Grid size:', { width: gridWidth, height: gridHeight });
@@ -112,10 +118,11 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
     // Self collision - check if head hits any part of the body
     const selfCollision = body.some(segment => segment.x === head.x && segment.y === head.y);
     if (selfCollision) {
-      console.log('Self collision detected:', head);
+      console.log('Self collision detected:', head, 'Body segments:', body.length);
       return true;
     }
 
+    console.log('No collision detected');
     return false;
   }, []);
 
