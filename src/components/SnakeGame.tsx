@@ -7,11 +7,13 @@ import { Volume2, VolumeX } from 'lucide-react';
 import { useSnakeGame } from '@/hooks/use-snake-game';
 import { useGameControls } from '@/hooks/use-game-controls';
 import { useAudio } from '@/hooks/use-audio';
+import { useFullscreen } from '@/hooks/use-fullscreen'; // Import useFullscreen
 
 import { GameBoard } from '@/components/game/GameBoard';
 import { Snake } from '@/components/game/Snake';
 import { Food } from '@/components/game/Food';
 import { StartScreen } from '@/components/ui/StartScreen';
+import { FullscreenControls } from '@/components/ui/FullscreenControls'; // Reintroduce FullscreenControls
 import { GameOverDialog } from '@/components/ui/GameOverDialog';
 
 import { Button } from '@/components/ui/button';
@@ -104,6 +106,15 @@ export function SnakeGame() {
     }, 100);
   };
 
+  const { enterFullscreen } = useFullscreen(); // Use the hook
+
+  // Automatically enter fullscreen on mobile when game starts
+  useEffect(() => {
+    if (isMobile && gameState === 'playing') {
+      enterFullscreen();
+    }
+  }, [isMobile, gameState, enterFullscreen]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex flex-col p-2 md:p-4">
       {/* Header with score and controls */}
@@ -131,6 +142,9 @@ export function SnakeGame() {
 
       {/* Main Game Area */}
       <div className="flex-1 flex flex-col items-center justify-center w-full pt-4 max-w-none px-0 mobile-full-width"> {/* Reduced pt-8 to pt-4 */}
+        {/* Fullscreen Controls - only render on mobile */}
+        {isMobile && <FullscreenControls isMobile={isMobile} gameState={gameState} />}
+
         {/* Game Container - Moved up slightly */}
         <div className={`relative mb-4`} style={{ width: boardDimensions.boardWidth }}> {/* Adjusted width */}
           <GameBoard 
