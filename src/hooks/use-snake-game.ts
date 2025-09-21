@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   GRID_SIZE,
   GRID_SIZE_MOBILE,
+  GRID_SIZE_DESKTOP,
   getInitialSnakePosition,
   INITIAL_TICK_RATE,
   MIN_TICK_RATE,
@@ -35,9 +36,9 @@ export interface GameStateReturn {
   playEatSound: () => void;
 }
 
-export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
+export function useSnakeGame(playEatSound: () => void, gridWidth: number, gridHeight: number): GameStateReturn {
   // Game state
-  const [snakePosition, setSnakePosition] = useState<Position[]>(getInitialSnakePosition(GRID_SIZE_MOBILE));
+  const [snakePosition, setSnakePosition] = useState<Position[]>(getInitialSnakePosition(gridWidth));
   const [foodPosition, setFoodPosition] = useState<Position>({ x: 7, y: 7 }); // Better initial position within bounds
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [nextDirection, setNextDirection] = useState<Direction>('RIGHT');
@@ -58,26 +59,12 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
     }
   }, []);
 
-  // Generate random food position
-  const generateFoodPosition = useCallback((currentSnake: Position[]): Position => {
-    let newPosition: Position;
-    const gridHeight = Math.floor(GRID_SIZE_MOBILE * 1.5); // Match visual board height
-    do {
-      newPosition = {
-        x: Math.floor(Math.random() * GRID_SIZE_MOBILE),
-        y: Math.floor(Math.random() * gridHeight),
-      };
-    } while (currentSnake.some(segment => segment.x === newPosition.x && segment.y === newPosition.y));
-    return newPosition;
-  }, []);
-
   // Generate food position with better positioning
   const generateFoodPositionAligned = useCallback((currentSnake: Position[]): Position => {
     let newPosition: Position;
     const minPos = 1; // Keep food away from edges
-    const gridHeight = Math.floor(GRID_SIZE_MOBILE * 1.5); // Match visual board height
-    const maxX = GRID_SIZE_MOBILE - 2; // 15 columns (0-14)
-    const maxY = gridHeight - 2; // 22 rows (0-21)
+    const maxX = gridWidth - 2;
+    const maxY = gridHeight - 2;
 
     do {
       // Ensure food is properly positioned within safe bounds
@@ -93,20 +80,15 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
     } while (currentSnake.some(segment => segment.x === newPosition.x && segment.y === newPosition.y));
 
     console.log('Generated food position:', newPosition, 'within bounds:', {
-      x: newPosition.x >= 0 && newPosition.x < GRID_SIZE_MOBILE,
+      x: newPosition.x >= 0 && newPosition.x < gridWidth,
       y: newPosition.y >= 0 && newPosition.y < gridHeight
     });
 
     return newPosition;
-  }, []);
+  }, [gridWidth, gridHeight]);
 
   // Check collision with walls or self
   const checkCollision = useCallback((head: Position, body: Position[]): boolean => {
-    // Wall collision - check if head is outside the grid boundaries
-    // For mobile, the visual board is 1.5x height, so make collision grid match visual board
-    const gridWidth = GRID_SIZE_MOBILE; // 15 columns
-    const gridHeight = Math.floor(GRID_SIZE_MOBILE * 1.5); // 22 rows to match visual board
-
     // Debug logging to understand collision detection
     console.log('Collision check - Head:', head, 'Grid size:', { width: gridWidth, height: gridHeight });
 
@@ -173,7 +155,7 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
 
       return newSnake;
     });
-  }, [gameState, nextDirection, foodPosition, checkCollision, generateFoodPosition]);
+  }, [gameState, nextDirection, foodPosition, checkCollision, generateFoodPositionAligned, playEatSound]);
 
   // Start game loop
   useEffect(() => {
@@ -207,7 +189,7 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
 
   // Actions
   const startGame = useCallback(() => {
-    const initialSnake = getInitialSnakePosition(GRID_SIZE_MOBILE);
+    const initialSnake = getInitialSnakePosition(gridWidth);
     setGameState('playing');
     setSnakePosition(initialSnake);
     setFoodPosition(generateFoodPositionAligned(initialSnake));
@@ -215,10 +197,10 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
     setNextDirection('RIGHT');
     setScore(0);
     tickRateRef.current = INITIAL_TICK_RATE;
-  }, [generateFoodPositionAligned]);
+  }, [generateFoodPositionAligned, gridWidth]);
 
   const resetGame = useCallback(() => {
-    const initialSnake = getInitialSnakePosition(GRID_SIZE_MOBILE);
+    const initialSnake = getInitialSnakePosition(gridWidth);
     setGameState('start');
     setSnakePosition(initialSnake);
     setFoodPosition(generateFoodPositionAligned(initialSnake));
@@ -226,7 +208,7 @@ export function useSnakeGame(playEatSound?: () => void): GameStateReturn {
     setNextDirection('RIGHT');
     setScore(0);
     tickRateRef.current = INITIAL_TICK_RATE;
-  }, [generateFoodPositionAligned]);
+  }, [generateFoodPositionAligned, gridWidth]);
 
   const setDirectionHandler = useCallback((newDirection: Direction) => {
     // Prevent reversing into self

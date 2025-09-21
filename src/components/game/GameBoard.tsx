@@ -1,19 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { getBoardSize, getCellSize } from '@/lib/game-constants';
 
 interface GameBoardProps {
   children: React.ReactNode;
-  isMobile?: boolean;
+  boardWidth: number;
+  boardHeight: number;
+  gridWidth: number; // Add gridWidth prop
+  onTouchStart?: React.TouchEventHandler<HTMLDivElement>;
+  onTouchEnd?: React.TouchEventHandler<HTMLDivElement>;
+  onTouchMove?: React.TouchEventHandler<HTMLDivElement>;
 }
 
-export function GameBoard({ children, isMobile = false }: GameBoardProps) {
-  const boardSize = getBoardSize(isMobile);
-  const cellSize = getCellSize(isMobile);
-
-  // For mobile, make height 1.5 times the width to give more vertical space
-  const boardWidth = boardSize;
-  const boardHeight = isMobile ? boardSize * 1.5 : boardSize;
+export function GameBoard({ children, boardWidth, boardHeight, gridWidth, onTouchStart, onTouchEnd, onTouchMove }: GameBoardProps) {
+  // Determine cellSize based on boardWidth and gridWidth
+  const cellSize = boardWidth / gridWidth;
 
   return (
     <motion.div
@@ -23,6 +23,9 @@ export function GameBoard({ children, isMobile = false }: GameBoardProps) {
         width: boardWidth,
         height: boardHeight,
       }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onTouchMove={onTouchMove}
       initial={{ scale: 0.8, opacity: 0, rotateY: -15 }}
       animate={{ scale: 1, opacity: 1, rotateY: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
@@ -33,7 +36,7 @@ export function GameBoard({ children, isMobile = false }: GameBoardProps) {
         style={{
           backgroundImage: `
             radial-gradient(circle at 1px 1px, #10b981 1px, transparent 0),
-            radial-gradient(circle at ${cellSize/2}px ${cellSize/2}px, #06b6d4 0.5px, transparent 0)
+            radial-gradient(circle at ${cellSize / 2}px ${cellSize / 2}px, #06b6d4 0.5px, transparent 0)
           `,
           backgroundSize: `${cellSize}px ${cellSize}px, ${cellSize}px ${cellSize}px`,
           animation: 'gridPulse 4s ease-in-out infinite',

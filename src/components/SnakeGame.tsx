@@ -13,27 +13,60 @@ import { Snake } from '@/components/game/Snake';
 import { Food } from '@/components/game/Food';
 import { StartScreen } from '@/components/ui/StartScreen';
 import { GameOverDialog } from '@/components/ui/GameOverDialog';
-import { ArrowControls } from '@/components/ui/ArrowControls';
-import { FullscreenControls } from '@/components/ui/FullscreenControls';
 
 import { Button } from '@/components/ui/button';
+import { GRID_SIZE_DESKTOP, CELL_SIZE_DESKTOP, GRID_SIZE_MOBILE, CELL_SIZE_MOBILE } from '@/lib/game-constants';
 
 export function SnakeGame() {
   const [isMobile, setIsMobile] = useState(false);
+  const [boardDimensions, setBoardDimensions] = useState({
+    boardWidth: GRID_SIZE_DESKTOP * CELL_SIZE_DESKTOP,
+    boardHeight: GRID_SIZE_DESKTOP * CELL_SIZE_DESKTOP * 1.5,
+    gridWidth: GRID_SIZE_DESKTOP,
+    gridHeight: Math.floor(GRID_SIZE_DESKTOP * 1.5),
+  });
 
-  // Detect mobile device
+  // Detect mobile device and set board dimensions
   useEffect(() => {
-    const checkMobile = () => {
+    const calculateDimensions = () => {
       const mobile = window.innerWidth < 768 || 'ontouchstart' in window;
       setIsMobile(mobile);
-      console.log('Mobile detection:', { width: window.innerWidth, hasTouch: 'ontouchstart' in window, isMobile: mobile });
+
+      let currentGridWidth;
+      let currentCellSize;
+
+      if (mobile) {
+        // For mobile, use a percentage of the width to ensure it scales down
+        const maxMobileBoardWidth = window.innerWidth * 0.9; // 90% of viewport width
+        currentCellSize = CELL_SIZE_MOBILE;
+        currentGridWidth = Math.floor(maxMobileBoardWidth / currentCellSize);
+        if (currentGridWidth < 10) currentGridWidth = 10; // Minimum grid size
+      } else {
+        currentGridWidth = GRID_SIZE_DESKTOP;
+        currentCellSize = CELL_SIZE_DESKTOP;
+      }
+
+      const currentBoardWidth = currentGridWidth * currentCellSize;
+      const currentGridHeight = Math.floor(currentGridWidth * 1.5);
+      const currentBoardHeight = currentGridHeight * currentCellSize;
+
+      setBoardDimensions({
+        boardWidth: currentBoardWidth,
+        boardHeight: currentBoardHeight,
+        gridWidth: currentGridWidth,
+        gridHeight: currentGridHeight,
+      });
+      console.log('Mobile detection:', { width: window.innerWidth, hasTouch: 'ontouchstart' in window, isMobile: mobile, boardDimensions: { currentBoardWidth, currentBoardHeight, currentGridWidth, currentGridHeight } });
     };
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    calculateDimensions();
+    window.addEventListener('resize', calculateDimensions);
 
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', calculateDimensions);
   }, []);
+
+  const { playEatSound, playGameOverSound } = useAudio();
+
   const {
     snakePosition,
     foodPosition,
@@ -45,13 +78,12 @@ export function SnakeGame() {
     resetGame,
     setDirection,
     toggleMute,
-  } = useSnakeGame();
-
-  const { playEatSound, playGameOverSound } = useAudio();
+  } = useSnakeGame(playEatSound, boardDimensions.gridWidth, boardDimensions.gridHeight);
   const { handleTouchStart, handleTouchEnd, handleTouchMove } = useGameControls({
     onDirectionChange: setDirection,
     isGameActive: gameState === 'playing',
   });
+
 
   // Play sound effects
   useEffect(() => {
@@ -98,20 +130,21 @@ export function SnakeGame() {
       </div>
 
       {/* Main Game Area */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full pt-8 max-w-none px-0 mobile-full-width">
-        {/* Fullscreen Controls */}
-        <FullscreenControls isMobile={isMobile} gameState={gameState} />
-
+      <div className="flex-1 flex flex-col items-center justify-center w-full pt-4 max-w-none px-0 mobile-full-width"> {/* Reduced pt-8 to pt-4 */}
         {/* Game Container - Moved up slightly */}
-        <div className={`relative mb-8 ${isMobile ? 'w-full px-0' : ''}`}>
-          <GameBoard isMobile={isMobile}>
+        <div className={`relative mb-4`} style={{ width: boardDimensions.boardWidth }}> {/* Adjusted width */}
+          <GameBoard 
+            boardWidth={boardDimensions.boardWidth}
+            boardHeight={boardDimensions.boardHeight}
+            gridWidth={boardDimensions.gridWidth} // Pass gridWidth
+            onTouchStart={gameState === 'playing' ? handleTouchStart : undefined}
+            onTouchEnd={gameState === 'playing' ? handleTouchEnd : undefined}
+            onTouchMove={gameState === 'playing' ? handleTouchMove : undefined}
+          >
             <AnimatePresence>
               {(gameState === 'playing' || gameState === 'gameOver') && (
                 <motion.div
                   key="game"
-                  onTouchStart={gameState === 'playing' ? handleTouchStart : undefined}
-                  onTouchEnd={gameState === 'playing' ? handleTouchEnd : undefined}
-                  onTouchMove={gameState === 'playing' ? handleTouchMove : undefined}
                   className="touch-none select-none"
                   style={{ touchAction: 'none' }} // Disable default touch behaviors
                 >
@@ -132,33 +165,16 @@ export function SnakeGame() {
             </AnimatePresence>
           </GameBoard>
         </div>
-
-        {/* Arrow Controls - Only show during gameplay and on mobile */}
-        {gameState === 'playing' && isMobile && (
-          <ArrowControls
-            onDirectionChange={setDirection}
-            disabled={false}
-          />
-        )}
       </div>
 
       {/* Game Over Dialog */}
-      <GameOverDialog
-        isOpen={gameState === 'gameOver'}
-        score={score}
-        highScore={highScore}
-        onPlayAgain={handlePlayAgain}
-      />
+      {gameState === 'gameOver' && (
+        <GameOverDialog
+          isOpen={gameState === 'gameOver'}
+          onPlayAgain={handlePlayAgain}
+        />
+      )}
 
-      {/* Instructions */}
-      <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400 max-w-md">
-        <p className="mb-2">
-          <span className="font-semibold">Desktop:</span> Use arrow keys or buttons
-        </p>
-        <p>
-          <span className="font-semibold">Mobile:</span> Swipe or use buttons
-        </p>
-      </div>
     </div>
   );
 }
